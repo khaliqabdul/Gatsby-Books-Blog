@@ -1,20 +1,48 @@
 import * as React from "react"
 import { Link, graphql } from "gatsby"
+// rich Text
+import {documentToReactComponents} from "@contentful/rich-text-react-renderer";
+import {BLOCKS, MARKS} from "@contentful/rich-text-types"
+
+import { GatsbyImage } from "gatsby-plugin-image"
 
 import Bio from "../components/bio"
 import Layout from "../components/layout"
 import Seo from "../components/seo"
 
 const BlogPostTemplate = ({ data, location }) => {
-  const post = data.markdownRemark
+  const post = data.contentfulBooks
   const siteTitle = data.site.siteMetadata?.title || `Title`
   const { previous, next } = data
-
+  const json = JSON.parse(post.description.raw)
+  
+  const RICHTEXT_OPTIONS = {
+    renderMark: {
+      [MARKS.BOLD]: text => <p>{text}</p>,
+    },
+    renderNode: {
+      [BLOCKS.PARAGRAPH]: (node, children) => (
+         <p>{children}</p>
+      ),
+      [MARKS.BOLD]: (node, children) => (
+         <p>{children}</p>
+      ),
+      "embedded-asset-block": node => {
+        const { gatsbyImageData } = data.contentfulBooks.description.references[0]
+        if (!gatsbyImageData) {
+          // asset is not an image
+          return null
+        }
+        return <GatsbyImage image={gatsbyImageData} />
+      },
+    },
+  }
+  console.log("previous", previous)
   return (
     <Layout location={location} title={siteTitle}>
       <Seo
-        title={post.frontmatter.title}
-        description={post.frontmatter.description || post.excerpt}
+        title={post.name}
+        description={post.description || post.excerpt}
       />
       <article
         className="blog-post"
@@ -22,13 +50,14 @@ const BlogPostTemplate = ({ data, location }) => {
         itemType="http://schema.org/Article"
       >
         <header>
-          <h1 itemProp="headline">{post.frontmatter.title}</h1>
-          <p>{post.frontmatter.date}</p>
+          <h1 itemProp="headline">{post.name}</h1>
+          <p>Date: {post.createdAt}</p>
+          <img src={post.picture.fixed.src} alt="fixed" width="100" height="150"/>
         </header>
-        <section
-          dangerouslySetInnerHTML={{ __html: post.html }}
-          itemProp="articleBody"
-        />
+        <section>
+          {documentToReactComponents(json, RICHTEXT_OPTIONS)}
+        </section>
+                
         <hr />
         <footer>
           <Bio />
@@ -46,15 +75,15 @@ const BlogPostTemplate = ({ data, location }) => {
         >
           <li>
             {previous && (
-              <Link to={previous.fields.slug} rel="prev">
-                ← {previous.frontmatter.title}
+              <Link to={previous.slug} rel="prev">
+                ← {previous.name}
               </Link>
             )}
           </li>
           <li>
             {next && (
-              <Link to={next.fields.slug} rel="next">
-                {next.frontmatter.title} →
+              <Link to={next.slug} rel="next">
+                {next.name} →
               </Link>
             )}
           </li>
@@ -77,31 +106,39 @@ export const pageQuery = graphql`
         title
       }
     }
-    markdownRemark(id: { eq: $id }) {
+    contentfulBooks(id: { eq: $id }) {
       id
-      excerpt(pruneLength: 160)
-      html
-      frontmatter {
-        title
-        date(formatString: "MMMM DD, YYYY")
-        description
+      name
+      createdAt(formatString: "DD-MM-YYYY")
+      description {
+        raw
+        references {
+          ... on ContentfulAsset{
+            contentful_id
+            __typename
+          }
+          gatsbyImageData
+        }
+      }
+      picture {
+        fluid(maxHeight: 300, maxWidth: 300){
+          ...GatsbyContentfulFluid
+        }
+        fixed{
+          base64
+          src
+        }
       }
     }
-    previous: markdownRemark(id: { eq: $previousPostId }) {
-      fields {
-        slug
-      }
-      frontmatter {
-        title
-      }
+    previous: contentfulBooks(id: { eq: $previousPostId }) {
+      id
+      slug
+      name
     }
-    next: markdownRemark(id: { eq: $nextPostId }) {
-      fields {
-        slug
-      }
-      frontmatter {
-        title
-      }
+    next: contentfulBooks(id: { eq: $nextPostId }) {
+      id
+      slug
+      name
     }
   }
 `

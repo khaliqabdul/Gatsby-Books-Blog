@@ -1,9 +1,15 @@
+const dotenv = require("dotenv");
+
+//if(process.env.NODE_ENV !== 'production'){
+dotenv.config();
+//}
+
 module.exports = {
   siteMetadata: {
-    title: `Gatsby Starter Blog`,
+    title: `Azeemi Books Blog`,
     author: {
-      name: `Kyle Mathews`,
-      summary: `who lives and works in San Francisco building useful things.`,
+      name: `Abdul Khaliq`,
+      summary: `who lives and works in Chashma Mianwali building useful things.`,
     },
     description: `A starter blog demonstrating what Gatsby can do.`,
     siteUrl: `https://gatsbystarterblogsource.gatsbyjs.io/`,
@@ -13,11 +19,19 @@ module.exports = {
   },
   plugins: [
     `gatsby-plugin-image`,
+    `@contentful/gatsby-transformer-contentful-richtext`,
+    // {
+    //   resolve: `gatsby-source-filesystem`,
+    //   options: {
+    //     path: `${__dirname}/content/blog`,
+    //     name: `blog`,
+    //   },
+    // },
     {
-      resolve: `gatsby-source-filesystem`,
+      resolve: `gatsby-source-contentful`,
       options: {
-        path: `${__dirname}/content/blog`,
-        name: `blog`,
+        spaceId: process.env.CONTENTFUL_SPACE_ID,
+        accessToken: process.env.CONTENTFUL_ACCESS_TOKEN,
       },
     },
     {

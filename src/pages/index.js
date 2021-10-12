@@ -6,10 +6,11 @@ import Layout from "../components/layout"
 import Seo from "../components/seo"
 
 const BlogIndex = ({ data, location }) => {
-  const siteTitle = data.site.siteMetadata?.title || `Title`
-  const posts = data.allMarkdownRemark.nodes
+const siteTitle = data.site.siteMetadata?.title || `Title`
+const books = data.allContentfulBooks.nodes
 
-  if (posts.length === 0) {
+  //console.log("location", location)
+  if (books.length === 0) {
     return (
       <Layout location={location} title={siteTitle}>
         <Seo title="All posts" />
@@ -28,11 +29,11 @@ const BlogIndex = ({ data, location }) => {
       <Seo title="All posts" />
       <Bio />
       <ol style={{ listStyle: `none` }}>
-        {posts.map(post => {
-          const title = post.frontmatter.title || post.fields.slug
+        {books.map(books => {
+          const title = books.name || books.slug
 
           return (
-            <li key={post.fields.slug}>
+            <li key={books.slug}>
               <article
                 className="post-list-item"
                 itemScope
@@ -40,19 +41,14 @@ const BlogIndex = ({ data, location }) => {
               >
                 <header>
                   <h2>
-                    <Link to={post.fields.slug} itemProp="url">
+                    <Link to={books.slug} itemProp="url">
                       <span itemProp="headline">{title}</span>
                     </Link>
                   </h2>
-                  <small>{post.frontmatter.date}</small>
+                  <small> Price: Rs.{books.price}</small>
                 </header>
                 <section>
-                  <p
-                    dangerouslySetInnerHTML={{
-                      __html: post.frontmatter.description || post.excerpt,
-                    }}
-                    itemProp="description"
-                  />
+                  {books.author}
                 </section>
               </article>
             </li>
@@ -70,6 +66,19 @@ export const pageQuery = graphql`
     site {
       siteMetadata {
         title
+      }
+    }
+    allContentfulBooks {
+      nodes {
+        author
+        createdAt
+        id
+        name
+        price
+        slug
+        description {
+          raw
+        }
       }
     }
     allMarkdownRemark(sort: { fields: [frontmatter___date], order: DESC }) {
