@@ -37,7 +37,7 @@ const BlogPostTemplate = ({ data, location }) => {
       },
     },
   }
-  console.log("previous", previous)
+  
   return (
     <Layout location={location} title={siteTitle}>
       <Seo
