@@ -15,7 +15,7 @@ const BlogPostTemplate = ({ data, location }) => {
   const siteTitle = data.site.siteMetadata?.title || `Title`
   const { previous, next } = data
   const json = JSON.parse(post.description.raw)
-  
+
   const RICHTEXT_OPTIONS = {
     renderMark: {
       [MARKS.BOLD]: text => <p>{text}</p>,
@@ -33,7 +33,7 @@ const BlogPostTemplate = ({ data, location }) => {
           // asset is not an image
           return null
         }
-        return <GatsbyImage image={gatsbyImageData} />
+        return <GatsbyImage image={gatsbyImageData} alt="" />
       },
     },
   }
