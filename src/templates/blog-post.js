@@ -15,7 +15,8 @@ const BlogPostTemplate = ({ data, location }) => {
   const siteTitle = data.site.siteMetadata?.title || `Title`
   const { previous, next } = data
   const json = JSON.parse(post.description.raw)
-
+  // console.log("Previous", previous)
+  // console.log("next", next)
   const RICHTEXT_OPTIONS = {
     renderMark: {
       [MARKS.BOLD]: text => <p>{text}</p>,
@@ -75,18 +76,19 @@ const BlogPostTemplate = ({ data, location }) => {
         >
           <li>
             {previous && (
-              <Link to={previous.slug} rel="prev">
-                ← {previous.name}
+              <Link to={`/${previous.slug}`} rel="prev">
+                ← {previous.slug}
               </Link>
             )}
           </li>
           <li>
             {next && (
-              <Link to={next.slug} rel="next">
-                {next.name} →
+              <Link to={`/${next.slug}`} rel="next">
+                {next.slug} →
               </Link>
             )}
           </li>
+          
         </ul>
       </nav>
     </Layout>
@@ -109,6 +111,7 @@ export const pageQuery = graphql`
     contentfulBooks(id: { eq: $id }) {
       id
       name
+      slug
       createdAt(formatString: "DD-MM-YYYY")
       description {
         raw
